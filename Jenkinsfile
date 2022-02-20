@@ -36,7 +36,6 @@ pipeline
         {
             steps
             {
-                # input message: 'Need approval from DM', submitter: 'manager'
                 sh 'scp /home/ubuntu/.jenkins/workspace/declarative_pipeline/webapp/target/webapp.war ubuntu@172.31.87.233:/var/lib/tomcat9/webapps/prod2app.war'
             }
         }

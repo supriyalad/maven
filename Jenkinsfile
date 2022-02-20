@@ -1,20 +1,60 @@
-def newgit(repo)
+@Library('sharedlibraries')_
+pipeline
 {
-  git "${repo}" 
-}
-def maven()
-{
-  sh 'mvn package' 
-}
-def deploy(ip,appname)
-{
-  sh "scp /home/ubuntu/.jenkins/workspace/declarative_pipeline/webapp/target/webapp.war ubuntu@${ip}:/var/lib/tomcat9/webapps/${appname}.war" 
-}
-def test(path)
-{
-  sh "java -jar $path/testing.jar"
-}
-def approval(name)
-{
-  input message: 'Need approval before deploying on PROD', submitter: "$name" 
+    agent any
+    stages
+    {
+        stage('ContinuousDownload')
+        {
+            steps
+            {
+                script
+                {
+                    cicd.newgit("https://github.com/supriyalad/maven.git")
+                }
+            }
+        }
+        stage('ContinuousBuild')
+        {
+            steps
+            {
+                script
+                {
+                    cicd.maven()
+                }
+            }
+        }
+        stage('ContinuousDeployment')
+        {
+            steps
+            {
+                script
+                {
+                    cicd.deploy("172.31.91.148","testapp3")
+                }
+            }
+        }
+        stage('ContinuousTesting')
+        {
+            steps
+            {
+                script
+                {
+                    cicd.newgit("https://github.com/intelliqittrainings/FunctionalTesting.git")
+                    cicd.test("/home/ubuntu/.jenkins/workspace/pipelinewithlibraries")
+                }
+            }
+        }
+        stage('ContinuousDelivery')
+        {
+            steps
+            {
+                script
+                {
+                    cicd.approval("manager")
+                    cicd.deploy("172.31.87.233","prodapp3")
+                }
+            }
+        }
+    }
 }
